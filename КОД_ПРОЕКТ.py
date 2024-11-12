@@ -3,12 +3,11 @@ import io
 import sys
 import binascii
 
-
 from PyQt6 import uic
-from podpis import Signature
+from signature import Signature
+from database import DatabasePasswords
 from cryptography.fernet import Fernet
-from PyQt6.QtWidgets import QApplication, QMainWindow, QButtonGroup, QLabel, QLineEdit, QPushButton, QComboBox, QDialog
-from PyQt6.QtWidgets import QVBoxLayout
+from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton
 
 template = '''<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
@@ -261,48 +260,100 @@ template = '''<?xml version="1.0" encoding="UTF-8"?>
 class Dialog1(QMainWindow):
     def __init__(self):
         super().__init__()
-        f = io.StringIO(template)
-        uic.loadUi(f, self)
+        design = io.StringIO(template)
+        uic.loadUi(design, self)
         key = Fernet.generate_key()
         self.f = Fernet(key)
         self.setFixedSize(1000, 1000)
-        self.pushButton.clicked.connect(self.shifr)
-        self.pushButton_2.clicked.connect(self.deshifr)
-        self.pushButton_3.clicked.connect(self.to_signature)
-        self.pushButton_5.clicked.connect(self.hashing_soo)
 
+        self.algorithm_comboBox = self.comboBox
+        self.encrypt_button = self.pushButton
+        self.decrypt_button = self.pushButton_2
+        self.to_signature_button = self.pushButton_3
+        self.hashing_soo_button = self.pushButton_5
+        self.message_before_encrypt = self.lineEdit
+        self.message_after_encrypt = self.lineEdit_3
+        self.message_before_decrypt = self.lineEdit_2
+        self.message_after_decrypt = self.lineEdit_4
+        self.message_before_hex = self.lineEdit_6
+        self.message_after_hex = self.lineEdit_7
+        self.message_salt = self.lineEdit_9
+
+        self.signature = None
+        self.database = None
+        self.hash_algorithm = "md5"
+        self.algorithm_comboBox.addItems(["md5", "sha1", "sha256"])
+        self.algorithm_comboBox.currentIndexChanged.connect(self.update_hash_algorithm)
+        self.to_db_button = QPushButton("К БАЗЕ ДАННЫХ", self)
+        self.to_db_button.move(680, 350)
+        self.to_db_button.clicked.connect(self.to_db)
+        self.encrypt_button.clicked.connect(self.encrypt)
+        self.decrypt_button.clicked.connect(self.decrypt)
+        self.to_signature_button.clicked.connect(self.to_signature)
+        self.hashing_soo_button.clicked.connect(self.hashing_soo)
+
+    def to_db(self):
+        self.database = DatabasePasswords()
+        self.database.show()
 
     def to_signature(self):
         self.signature = Signature()
         self.signature.show()
 
-    def shifr(self):
-        if self.lineEdit.text() == "":
-            pass
-        else:
-            self.lineEdit_3.setText(str(self.f.encrypt(self.lineEdit.text().encode()))[2:-1])
-            self.lineEdit.clear()
+    def update_hash_algorithm(self):
+        self.hash_algorithm = self.algorithm_comboBox.currentText()
 
-    def deshifr(self):
-        if self.lineEdit_2.text() == "":
+    def encrypt(self):
+        if self.message_before_encrypt.text() == "":
             pass
         else:
-            self.lineEdit_4.setText(self.f.decrypt(self.lineEdit_2.text().encode()).decode())
-            self.lineEdit_2.clear()
+            self.message_after_encrypt.setText(str(self.f.encrypt(self.message_before_encrypt.text().encode()))[2:-1])
+            self.message_before_encrypt.clear()
+
+    def decrypt(self):
+        if self.message_before_decrypt.text() == "":
+            pass
+        else:
+            self.message_after_decrypt.setText(self.f.decrypt(self.message_before_decrypt.text().encode()).decode())
+            self.message_before_decrypt.clear()
 
     def hashing_soo(self):
-        if self.lineEdit_6.text() == "":
+        if self.message_before_hex.text() == "":
             pass
         else:
-            my_password = str(self.lineEdit_6.text())
-            my_salt = str(self.lineEdit_9.text())
-            message_do = hashlib.pbkdf2_hmac(hash_name='sha256',
-                                     password=bytes(my_password, 'utf-8'),
-                                     salt=bytes(my_salt, 'utf-8'),
-                                     iterations=100000)
-            result = str(binascii.hexlify(message_do[2:-1]))
-            self.lineEdit_7.setText(result)
-
+            if self.hash_algorithm == "md5":
+                my_password = str(self.message_before_hex.text())
+                my_salt = str(self.message_salt.text())
+                message_do = hashlib.pbkdf2_hmac(hash_name='md5',
+                                                 password=bytes(my_password, 'utf-8'),
+                                                 salt=bytes(my_salt, 'utf-8'),
+                                                 iterations=100000)
+                result = str(binascii.hexlify(message_do[2:-1]))
+                self.message_after_hex.setText(result)
+                self.message_before_hex.clear()
+                self.message_salt.clear()
+            elif self.hash_algorithm == "sha1":
+                my_password = str(self.message_before_hex.text())
+                my_salt = str(self.message_salt.text())
+                message_do = hashlib.pbkdf2_hmac(hash_name='sha1',
+                                                 password=bytes(my_password, 'utf-8'),
+                                                 salt=bytes(my_salt, 'utf-8'),
+                                                 iterations=100000)
+                result = str(binascii.hexlify(message_do[2:-1]))
+                self.message_after_hex.setText(result)
+                self.message_before_hex.clear()
+                self.message_salt.clear()
+            elif self.hash_algorithm == "sha256":
+                my_password = str(self.message_before_hex.text())
+                my_salt = str(self.message_salt.text())
+                message_do = hashlib.pbkdf2_hmac(hash_name='sha256',
+                                                 password=bytes(my_password, 'utf-8'),
+                                                 salt=bytes(my_salt, 'utf-8'),
+                                                 iterations=100000)
+                result = str(binascii.hexlify(message_do[2:-1]))
+                self.message_after_hex.setText(result)
+                self.message_before_hex.clear()
+                self.message_salt.clear()
 
 
 if __name__ == '__main__':

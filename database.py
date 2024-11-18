@@ -8,6 +8,7 @@ class DatabasePasswords(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setFixedSize(300, 300)
+        self.setWindowTitle("База данных")
         self.password_table = QTableWidget(self)
         self.password_table.setColumnCount(3)
         self.password_table.setHorizontalHeaderLabels(["Название сайта", "Логин", "Пароль"])
@@ -54,7 +55,7 @@ class DatabasePasswords(QMainWindow):
     def load_passwords(self):
         conn = sqlite3.connect("passwords.db")
         cur = conn.cursor()
-        cur.execute("SELECT * FROM passwords")
+        cur.execute("""SELECT * FROM passwords""")
         passwords = cur.fetchall()
         conn.close()
         self.password_table.setRowCount(len(passwords))
@@ -82,7 +83,8 @@ class DatabasePasswords(QMainWindow):
                     conn = sqlite3.connect("passwords.db")
                     cursor = conn.cursor()
                     cursor.execute(
-                        "INSERT INTO passwords (site, login, password) VALUES (?, ?, ?)",
+                        """INSERT INTO passwords (site, login, password)
+                                VALUES (?, ?, ?)""",
                         (site, login, password),
                     )
                     conn.commit()
@@ -112,7 +114,12 @@ class DatabasePasswords(QMainWindow):
                     conn = sqlite3.connect("passwords.db")
                     cursor = conn.cursor()
                     cursor.execute(
-                        "UPDATE passwords SET site = ?, login = ?, password = ? WHERE site = ? AND login = ?",
+                        """
+                            UPDATE passwords
+                            SET site = ?, login = ?, password = ?
+                            WHERE site = ?
+                            AND login = ?
+                            """,
                         (new_site, new_login, new_password, site, login),
                     )
                     conn.commit()
@@ -132,7 +139,11 @@ class DatabasePasswords(QMainWindow):
         if reply == QMessageBox.StandardButton.Yes:
             conn = sqlite3.connect("passwords.db")
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM passwords WHERE site = ? AND login = ?", (site, login))
+            cursor.execute("""DELETE FROM passwords
+                                WHERE site = ?
+                                AND login = ?""",
+                           (site, login)
+                           )
             conn.commit()
             conn.close()
             self.load_passwords()

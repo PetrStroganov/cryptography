@@ -269,7 +269,6 @@ class MainWindow(QMainWindow):
         self.setAutoFillBackground(False)
         self.setWindowTitle("Шифратор")
         self.setStyleSheet('QMainWindow#MainWindow {background-image: url(background.jpg);}')
-
         self.algorithm_comboBox = self.comboBox
         self.encrypt_button = self.pushButton
         self.decrypt_button = self.pushButton_2
@@ -282,7 +281,6 @@ class MainWindow(QMainWindow):
         self.message_before_hex = self.lineEdit_6
         self.message_after_hex = self.lineEdit_7
         self.message_salt = self.lineEdit_9
-
         self.signature = None
         self.database = None
         self.hash_algorithm = "md5"
@@ -336,39 +334,16 @@ class MainWindow(QMainWindow):
         if self.message_before_hex.text() == "":
             pass
         else:
-            if self.hash_algorithm == "md5":
-                my_password = str(self.message_before_hex.text())
-                my_salt = str(self.message_salt.text())
-                message_do = hashlib.pbkdf2_hmac(hash_name='md5',
-                                                 password=bytes(my_password, 'utf-8'),
-                                                 salt=bytes(my_salt, 'utf-8'),
-                                                 iterations=100000)
-                result = str(binascii.hexlify(message_do[2:-1]))
-                self.message_after_hex.setText(result)
-                self.message_before_hex.clear()
-                self.message_salt.clear()
-            elif self.hash_algorithm == "sha1":
-                my_password = str(self.message_before_hex.text())
-                my_salt = str(self.message_salt.text())
-                message_do = hashlib.pbkdf2_hmac(hash_name='sha1',
-                                                 password=bytes(my_password, 'utf-8'),
-                                                 salt=bytes(my_salt, 'utf-8'),
-                                                 iterations=100000)
-                result = str(binascii.hexlify(message_do[2:-1]))
-                self.message_after_hex.setText(result)
-                self.message_before_hex.clear()
-                self.message_salt.clear()
-            elif self.hash_algorithm == "sha256":
-                my_password = str(self.message_before_hex.text())
-                my_salt = str(self.message_salt.text())
-                message_do = hashlib.pbkdf2_hmac(hash_name='sha256',
-                                                 password=bytes(my_password, 'utf-8'),
-                                                 salt=bytes(my_salt, 'utf-8'),
-                                                 iterations=100000)
-                result = str(binascii.hexlify(message_do[2:-1]))
-                self.message_after_hex.setText(result)
-                self.message_before_hex.clear()
-                self.message_salt.clear()
+            my_password = str(self.message_before_hex.text())
+            my_salt = str(self.message_salt.text())
+            message_do = hashlib.pbkdf2_hmac(hash_name=self.hash_algorithm,
+                                             password=bytes(my_password, 'utf-8'),
+                                             salt=bytes(my_salt, 'utf-8'),
+                                             iterations=100000)
+            result = str(binascii.hexlify(message_do[2:-1]))
+            self.message_after_hex.setText(result)
+            self.message_before_hex.clear()
+            self.message_salt.clear()
 
 
 if __name__ == '__main__':

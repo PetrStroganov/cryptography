@@ -14,20 +14,16 @@ class DatabasePasswords(QMainWindow):
         self.password_table.setHorizontalHeaderLabels(["Название сайта", "Логин", "Пароль"])
         self.password_table.cellClicked.connect(self.edit_password)
         self.password_table.resizeColumnsToContents()
-
         self.add_password_button = QPushButton("Добавить пароль")
         self.add_password_button.clicked.connect(self.add_password)
         self.delete_password_button = QPushButton("Удалить пароль")
         self.delete_password_button.clicked.connect(self.delete_password)
-
         password_layout = QVBoxLayout()
         password_layout.addWidget(self.password_table)
         password_layout.addWidget(self.add_password_button)
         password_layout.addWidget(self.delete_password_button)
-
         self.password_widget = QWidget()
         self.password_widget.setLayout(password_layout)
-
         self.widget = QWidget()
         layout = QVBoxLayout()
         layout.addWidget(self.password_widget)

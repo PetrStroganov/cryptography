@@ -44,7 +44,6 @@ class Signature(QWidget):
         layout.addWidget(self.result_label)
         layout.addWidget(self.result_edit)
         self.setLayout(layout)
-
         self.private_key = None
         self.public_key = None
 
